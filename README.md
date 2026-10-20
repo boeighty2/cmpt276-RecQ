@@ -8,9 +8,9 @@
 
 ## Project Information
 
-- **Group:** [Add group number]
-- **GitHub repository:** [Add repository URL]
-- **Live application on Render:** [Add Render URL]
+- **Group:** RecQ
+- **GitHub repository:** https://github.com/boeighty2/cmpt276-RecQ
+- **Live application on Render:** https://cmpt276-recq.onrender.com/
 
 ## Abstract
 
