@@ -142,6 +142,9 @@ Dmitriy Petrichshev has experience with C++ programming, data structures and alg
 
 Zhengyang Gu has experience with Spring Boot, HTML, CSS, JavaScript, Git, GitHub, and deploying web applications on Render through previous coursework. He is also developing a local text search tool as a personal project. His strengths include identifying practical user needs, organizing feature requirements, and designing clear user workflows.
 
+Elysia Anne Wimmer has past experience in C, C++, Java and Python. Through CMPT 276 she has further grown her capabilities, by growing a basic understanding of HTML, Springboot, Javascript and CSS. Though she is just beginning her journey on web development she is excited for the challenges and chances to learn she will face in this project. Along with the chance to work in a group programming setting.
+
+
 ### Proposed Responsibilities and Collaboration
 
 Each team member will take primary responsibility for one major epic. Elysia Anne Wimmer will lead Epic 1, Emily Tsou will lead Epic 2, Jiawen Wang will lead Epic 3, Dmitriy Petrichshev will lead Epic 4, and Zhengyang Gu will lead Epic 5. Emily and Jiawen's developing web development experience supports the user-facing and administrative interfaces in Epics 2 and 3. Dmitriy's background in data structures and algorithms is relevant to the FIFO queue logic in Epic 4, while Zhengyang's experience with Spring Boot and web deployment supports the notification and automatic turn-management work in Epic 5.
