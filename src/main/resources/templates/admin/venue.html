@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>RecQ | Sports at Venue</title><link rel="stylesheet" th:href="@{/css/epic3.css}" href="/css/epic3.css"><link rel="stylesheet" th:href="@{/css/epic3-navigation.css}" href="/css/epic3-navigation.css"></head>
+<body><header class="site-header"><div class="wrap header-inner"><div class="brand">SFU <strong>RecQ</strong><span class="brand-sub">Staff Console</span></div><div class="header-actions"><div th:replace="~{admin/fragments/staff-menu :: menu}"></div></div></div></header>
+<main class="wrap">
+<nav class="crumbs"><a th:href="@{/admin/courts}">All Venues</a><span>›</span><strong th:text="${gym}">East Gym</strong></nav>
+<div class="page-heading"><div class="recq-heading-title"><a class="recq-back-arrow" th:href="@{/admin/courts}" href="/admin/courts" aria-label="Back to all venues" title="Back to all venues"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5m7 7-7-7 7-7"/></svg></a><div><p class="eyebrow">VENUE MANAGEMENT</p><h1 th:text="${gym}">East Gym</h1></div></div>
+<div class="venue-top-actions"><button id="sport-manage-toggle" class="manage-toggle" type="button" aria-expanded="false" aria-controls="sport-sections">Manage</button><a class="action-link sport-config-control" hidden th:href="@{/admin/courts/new(gym=${gym})}">+ Add Sport</a></div></div>
+<div class="flash success" role="status" th:if="${success}" th:text="${success}"></div><div class="flash error" role="alert" th:if="${error}" th:text="${error}"></div>
+<div id="sport-sections" class="sport-grid">
+<section class="sport-panel" th:each="item : ${sportItems}" th:classappend="${!item.open()} ? ' sport-panel-closed' : ''">
+<div class="sport-panel-head"><div class="sport-title-group"><h2 th:text="${item.name()}">Badminton</h2>
+<button type="button" class="rename-open-btn sport-config-control" hidden
+        th:attr="data-rename-sport=${item.name()},aria-label=${'Rename ' + item.name()}">Rename</button>
+<span class="tag available" th:if="${item.open()}">OPEN</span><span class="tag closed-strong" th:unless="${item.open()}">CLOSED</span></div>
+<form th:action="@{/admin/courts/sport/state}" method="post"><input type="hidden" name="gym" th:value="${gym}"><input type="hidden" name="sport" th:value="${item.name()}"><input type="hidden" name="open" th:value="${!item.open()}"><button type="submit" th:class="${item.open()} ? 'close-sport-btn' : 'reopen-sport-btn'" th:text="${item.open()} ? 'Close Sport' : 'Open Sport'">Open Sport</button></form></div>
+<div class="sport-panel-body">
+
+<p class="muted compact" th:if="${item.open()}" th:text="${item.total()} + (${item.total()} == 1 ? ' court' : ' courts') + ' · ' + ${item.available()} + ' available'">6 courts</p>
+<p class="muted compact" th:unless="${item.open()}" th:text="${item.total()} + (${item.total()} == 1 ? ' court' : ' courts') + ' configured'">6 courts configured</p>
+<a class="tile-link" th:href="@{/admin/courts/sport(gym=${gym},sport=${item.name()})}">View and manage courts →</a>
+<div class="card-config-actions sport-config-control" hidden>
+  <button type="button" class="danger-quiet" th:attr="data-delete-sport=${item.name()}">Delete</button>
+</div>
+</div></section></div>
+</main>
+<dialog id="rename-sport-dialog" class="epic-modal" aria-labelledby="rename-sport-title">
+  <form method="post" th:action="@{/admin/courts/sport/rename}">
+    <input type="hidden" name="gym" th:value="${gym}">
+    <input type="hidden" name="sport" id="rename-sport-original">
+    <h2 id="rename-sport-title">Rename sport</h2>
+    
+    <label for="rename-sport-input">Sport name</label>
+    <input id="rename-sport-input" type="text" name="newName" maxlength="100" required>
+    <div class="modal-actions">
+      <button type="button" data-cancel-modal>Cancel</button>
+      <button type="submit" class="primary">Save changes</button>
+    </div>
+  </form>
+</dialog>
+<dialog id="delete-sport-dialog" class="epic-modal" aria-labelledby="delete-sport-title">
+  <form method="post" th:action="@{/admin/courts/sport/delete}">
+    <input type="hidden" name="gym" th:value="${gym}">
+    <input type="hidden" name="sport" id="delete-sport-name">
+    <h2 id="delete-sport-title">Delete sport?</h2>
+    <p class="modal-description">Delete <strong id="delete-sport-description"></strong> and all of its courts at this venue? This action cannot be undone. Sports with occupied courts cannot be deleted.</p>
+    <div class="modal-actions">
+      <button type="button" data-cancel-modal>Cancel</button>
+      <button type="submit" class="danger-confirm">Confirm Delete</button>
+    </div>
+  </form>
+</dialog>
+<script>
+(function () {
+    const toggle = document.getElementById('sport-manage-toggle');
+    const controls = document.querySelectorAll('.sport-config-control');
+    const renameDialog = document.getElementById('rename-sport-dialog');
+    const deleteDialog = document.getElementById('delete-sport-dialog');
+    const renameOriginal = document.getElementById('rename-sport-original');
+    const renameInput = document.getElementById('rename-sport-input');
+    toggle.addEventListener('click', () => {
+        const managing = toggle.getAttribute('aria-expanded') !== 'true';
+        toggle.setAttribute('aria-expanded', String(managing));
+        toggle.textContent = managing ? 'Done' : 'Manage';
+        controls.forEach(control => { control.hidden = !managing; });
+    });
+    document.querySelectorAll('[data-rename-sport]').forEach(button => {
+        button.addEventListener('click', () => {
+            const sportName = button.dataset.renameSport;
+            renameOriginal.value = sportName;
+            renameInput.value = sportName;
+            renameDialog.showModal();
+            renameInput.focus();
+            renameInput.select();
+        });
+    });
+    document.querySelectorAll('[data-delete-sport]').forEach(button => {
+        button.addEventListener('click', () => {
+            const sportName = button.dataset.deleteSport;
+            document.getElementById('delete-sport-name').value = sportName;
+            document.getElementById('delete-sport-description').textContent = sportName;
+            deleteDialog.showModal();
+        });
+    });
+    document.querySelectorAll('[data-cancel-modal]').forEach(button => {
+        button.addEventListener('click', () => button.closest('dialog').close());
+    });
+}());
+</script>
+</body></html>

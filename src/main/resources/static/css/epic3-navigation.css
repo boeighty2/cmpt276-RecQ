@@ -1,0 +1,15 @@
+/* Hierarchical back-arrow navigation shared by venue and sport pages. */
+.recq-heading-title { display:flex; align-items:center; gap:14px; min-width:0; }
+.recq-heading-title > div { min-width:0; }
+.recq-back-arrow {
+  width:42px; height:42px; display:inline-flex; align-items:center; justify-content:center;
+  flex:0 0 42px; background:#fff; color:#343b43; border:1px solid #d4d9df;
+  border-radius:10px; text-decoration:none; transition:background .15s ease, border-color .15s ease;
+}
+.recq-back-arrow svg { width:21px; height:21px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.recq-back-arrow:hover { background:#f9eef1; border-color:#98172f; color:#98172f; }
+.recq-back-arrow:focus-visible { outline:3px solid #246fc3; outline-offset:3px; }
+@media(max-width:560px){
+ .recq-heading-title { gap:10px; }
+ .recq-back-arrow { width:38px; height:38px; flex-basis:38px; }
+}

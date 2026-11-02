@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div class="staff-account" th:fragment="menu">
+    <details class="staff-menu">
+        <summary class="staff-avatar" title="Account" th:attr="aria-label=|Account menu: ${staffInitials}|">
+            <span th:text="${staffInitials}">JW</span>
+        </summary>
+        <div class="staff-menu-popover">
+            <form th:action="@{/admin/logout}" method="post">
+                <button class="staff-logout" type="submit">Log out</button>
+            </form>
+        </div>
+    </details>
+</div>
+</body>
+</html>

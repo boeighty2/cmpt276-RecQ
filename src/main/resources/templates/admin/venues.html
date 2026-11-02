@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RecQ | Choose a Venue</title>
+    <link rel="stylesheet" th:href="@{/css/epic3.css}" href="/css/epic3.css">
+</head>
+<body>
+<header class="site-header"><div class="wrap header-inner"><div class="brand">SFU <strong>RecQ</strong><span class="brand-sub">Staff Console</span></div><div class="header-actions"><div th:replace="~{admin/fragments/staff-menu :: menu}"></div></div></div></header>
+<main class="wrap">
+    <div class="page-heading"><div><p class="eyebrow">ADMIN DASHBOARD</p><h1>Choose a venue</h1></div><div class="venue-top-actions"><button id="home-manage-toggle" class="manage-toggle" type="button" aria-expanded="false" aria-controls="home-add-sport">Manage</button><a id="home-add-sport" class="action-link home-config-control" hidden th:href="@{/admin/courts/new}">+ Add Sport</a></div></div>
+    <div class="flash success" role="status" th:if="${success}" th:text="${success}"></div>
+    <div class="flash error" role="alert" th:if="${error}" th:text="${error}"></div>
+    <section class="tile-grid" aria-label="Gym selection">
+        <article class="tile venue-tile" th:each="venue : ${venues}">
+            <div class="venue-title-row">
+                <h2 th:text="${venue.name()}">Demo Gym A</h2>
+                <button type="button" class="rename-open-btn home-config-control" hidden
+                        th:attr="data-rename-venue=${venue.name()},aria-label=${'Rename ' + venue.name()}">Rename</button>
+            </div>
+            <div class="sports-list" aria-label="Sports at this venue">
+                <span class="sport-pill" th:each="sportName : ${venue.sports()}"
+                      th:with="open=${venueSportStatuses.get(venue.name()).get(sportName)}"
+                      th:classappend="${open} ? ' sport-pill-open' : ' sport-pill-closed'"
+                      th:attr="aria-label=${sportName + (open ? ' open' : ' closed')}"
+                      th:text="${sportName}">Badminton</span>
+            </div>
+            <a class="tile-link" th:href="@{/admin/courts/venue(gym=${venue.name()})}">Manage venue →</a>
+            <div class="card-config-actions home-config-control" hidden>
+                <button type="button" class="danger-quiet" th:attr="data-delete-venue=${venue.name()},aria-label=${'Delete ' + venue.name()}">Delete</button>
+            </div>
+        </article>
+    </section>
+    <p class="empty" th:if="${#lists.isEmpty(venues)}">No venues yet.</p>
+</main>
+<dialog id="rename-venue-dialog" class="epic-modal" aria-labelledby="rename-venue-title">
+    <form th:action="@{/admin/courts/venue/rename}" method="post">
+        <input type="hidden" name="oldName" id="rename-venue-original">
+        <h2 id="rename-venue-title">Rename venue</h2>
+        
+        <label for="rename-venue-input">Venue name</label>
+        <input id="rename-venue-input" type="text" name="newName" maxlength="100" required>
+        <div class="modal-actions">
+            <button type="button" data-cancel-modal>Cancel</button>
+            <button type="submit" class="primary">Save changes</button>
+        </div>
+    </form>
+</dialog>
+<dialog id="delete-venue-dialog" class="epic-modal" aria-labelledby="delete-venue-title">
+    <form th:action="@{/admin/courts/venue/delete}" method="post">
+        <input type="hidden" name="venueName" id="delete-venue-original">
+        <h2 id="delete-venue-title">Delete venue?</h2>
+        <p class="modal-description">Delete <strong id="delete-venue-description"></strong>, all of its sports and all configured courts? This cannot be undone. You must close all sports first; occupied courts cannot be deleted.</p>
+        <div class="modal-actions">
+            <button type="button" data-cancel-modal>Cancel</button>
+            <button type="submit" class="danger-confirm">Confirm Delete</button>
+        </div>
+    </form>
+</dialog>
+<script>
+(function () {
+    const toggle = document.getElementById('home-manage-toggle');
+    const controls = document.querySelectorAll('.home-config-control');
+    const dialog = document.getElementById('rename-venue-dialog');
+    const original = document.getElementById('rename-venue-original');
+    const input = document.getElementById('rename-venue-input');
+    toggle.addEventListener('click', () => {
+        const managing = toggle.getAttribute('aria-expanded') !== 'true';
+        toggle.setAttribute('aria-expanded', String(managing));
+        toggle.textContent = managing ? 'Done' : 'Manage';
+        controls.forEach(control => { control.hidden = !managing; });
+    });
+    document.querySelectorAll('[data-rename-venue]').forEach(button => {
+        button.addEventListener('click', () => {
+            const name = button.dataset.renameVenue;
+            original.value = name;
+            input.value = name;
+            dialog.showModal();
+            input.focus();
+            input.select();
+        });
+    });
+    document.querySelectorAll('[data-delete-venue]').forEach(button => {
+        button.addEventListener('click', () => {
+            const name = button.dataset.deleteVenue;
+            document.getElementById('delete-venue-original').value = name;
+            document.getElementById('delete-venue-description').textContent = name;
+            document.getElementById('delete-venue-dialog').showModal();
+        });
+    });
+    document.querySelectorAll('[data-cancel-modal]').forEach(button => {
+        button.addEventListener('click', () => button.closest('dialog').close());
+    });
+}());
+</script>
+</body>
+</html>

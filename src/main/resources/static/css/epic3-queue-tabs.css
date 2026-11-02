@@ -1,0 +1,35 @@
+/* Queue panel layout. Segmented tab styling appears below. */
+.recq-tab-panel { margin-top: 22px; }
+.recq-tab-panel[hidden] { display: none !important; }
+.recq-queue-card { background: #fff; border: 1px solid #e1e4e8; border-radius: 14px; overflow: hidden; }
+.recq-queue-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 22px 24px; }
+.recq-queue-head h2 { margin: 0; font-size: 21px; }
+.recq-queue-status { display: inline-flex; background: #e7eaee; color: #515c68; border-radius: 99px; font-size: 12px; font-weight: 750; padding: 7px 11px; }
+.recq-queue-columns { display: grid; grid-template-columns: 100px 1fr 150px; gap: 12px; background: #f5f6f8; border-top: 1px solid #e4e7ea; border-bottom: 1px solid #e4e7ea; padding: 14px 24px; font-size: 13px; font-weight: 750; color: #45515f; }
+.recq-queue-empty { margin: 0; padding: 40px 24px; text-align: center; font-size: 15px; font-weight: 650; color: #505c68; }
+@media (max-width: 560px) {
+  .recq-queue-head { padding: 18px; }
+  .recq-queue-columns { grid-template-columns: 70px 1fr 70px; padding: 12px; font-size: 12px; }
+  .recq-queue-empty { padding: 30px 14px; }
+}
+
+/* Segmented sport tabs use the same layout in both views. */
+.recq-tabs {
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px;
+  width:100%; padding:5px; margin-top:27px;
+  border:1px solid #e0e3e7; background:#eff1f4; border-radius:12px;
+}
+button.recq-tab {
+  width:100%; margin:0; padding:11px 15px; border:1px solid transparent;
+  border-radius:9px; background:transparent; color:#5c6672;
+  font:inherit; font-size:14px; font-weight:750; line-height:1.35;
+}
+button.recq-tab:hover { border-color:transparent; background:#e5e7eb; color:#98172f; }
+button.recq-tab[aria-selected="true"] {
+  background:#fff; color:#98172f; border:1px solid #e4d4d9;
+  box-shadow:0 1px 4px #21293612;
+}
+button.recq-tab:focus-visible { outline:3px solid #246fc3; outline-offset:2px; }
+@media(max-width:560px){
+ .recq-tabs { width:100%; }
+}
