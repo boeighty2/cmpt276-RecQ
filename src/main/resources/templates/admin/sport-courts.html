@@ -8,6 +8,7 @@
 <div class="status-large" th:classappend="${sportIsOpen} ? ' status-large-open' : ' status-large-closed'" th:text="${sportIsOpen} ? 'OPEN' : 'CLOSED'">CLOSED</div></div>
 <div class="flash success" role="status" th:if="${success}" th:text="${success}"></div><div class="flash error" role="alert" th:if="${error}" th:text="${error}"></div>
 <!-- Epic 3 navigation: no fabricated queue participants until Epic 4 provides data. -->
+
 <div class="recq-tabs" role="tablist" aria-label="Sport management sections">
   <button id="recq-tab-courts" type="button" class="recq-tab" role="tab"
           aria-controls="recq-panel-courts" aria-selected="true" tabindex="0">Courts</button>
@@ -31,16 +32,7 @@
 </section>
 <section id="recq-panel-queue" class="recq-tab-panel" role="tabpanel"
          aria-labelledby="recq-tab-queue" tabindex="0" hidden>
-  <div class="recq-queue-card">
-    <div class="recq-queue-head">
-      <h2>Waiting Queue</h2>
-      <span class="recq-queue-status">Not connected</span>
-    </div>
-    <div class="recq-queue-columns" aria-hidden="true">
-      <span>Position</span><span>Participant</span><span>Status</span>
-    </div>
-    <p class="recq-queue-empty" role="status">Queue data unavailable</p>
-  </div>
+  <div th:replace="~{admin/fragments/queue-panel :: queuePanel(${gym}, ${sport}, ${activeRunId})}"></div>
 </section>
 </main>
 <script>(function(){const toggle=document.getElementById('court-manage-toggle');const controls=document.querySelectorAll('.court-edit-control');if(!toggle)return;const restoreKey='recq-epic3-sport-manage';const sportId=new URLSearchParams(window.location.search);const key=sportId.get('gym')+'|'+sportId.get('sport');function display(on){toggle.setAttribute('aria-expanded',String(on));toggle.textContent=on?'Done':'Manage';controls.forEach(c=>c.hidden=!on);}toggle.addEventListener('click',()=>display(toggle.getAttribute('aria-expanded')!=='true'));if(sessionStorage.getItem(restoreKey)===key)display(true);sessionStorage.removeItem(restoreKey);controls.forEach(form=>{if(form.tagName==='FORM')form.addEventListener('submit',()=>sessionStorage.setItem(restoreKey,key));});}());</script>
