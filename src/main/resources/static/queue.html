@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Queue - SFU RecQ</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 420px; margin: 40px auto; padding: 0 16px; text-align: center; }
+    .pos { font-size: 72px; font-weight: 700; margin: 8px 0; }
+    #msg { color: #b00020; }
+  </style>
+</head>
+<body>
+  <h1>Your Queue Position</h1>
+  <div class="pos" id="pos">–</div>
+  <p><span id="count">–</span> people waiting</p>
+  <button id="leave">Leave queue</button>
+  <p id="msg"></p>
+
+  <script>
+    // Temporary: ?gym=Burnaby%20Gym&sport=Badminton&userId=2&entryId=7
+    // Use the logged-in user instead once Epic 1 is integrated
+    const p = new URLSearchParams(location.search);
+    const userId = p.get("userId"), entryId = p.get("entryId");
+    const q = "gym=" + encodeURIComponent(p.get("gym")) +
+              "&sport=" + encodeURIComponent(p.get("sport")) + "&userId=" + userId;
+
+    async function refresh() {
+      const res = await fetch("/api/queue/position?" + q);
+      if (!res.ok) {
+        document.getElementById("pos").textContent = "–";
+        let text = "Error " + res.status;
+        try { text = (await res.json()).error || text; } catch (e) {}
+        document.getElementById("msg").textContent = text;
+        return;
+      }
+      const d = await res.json();
+      document.getElementById("pos").textContent = "#" + d.position;
+      document.getElementById("count").textContent = d.waitingCount;
+      document.getElementById("msg").textContent = "";
+    }
+
+    document.getElementById("leave").addEventListener("click", async function () {
+      if (!entryId || !confirm("Leave the queue?")) return;
+      await fetch("/api/queue/entries/" + entryId + "/leave", { method: "POST" });
+      refresh();
+    });
+
+    refresh();
+    setInterval(refresh, 5000);
+  </script>
+</body>
+</html>
