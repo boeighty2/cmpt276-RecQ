@@ -1,0 +1,169 @@
+/* SFU RecQ - Epic 2 Facility Discovery */
+
+:root {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background-color: #f6f7f9;
+    color: #24292f;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+}
+
+/* Header */
+header {
+    background-color: #9a1830;
+    color: white;
+    padding: 25px 6%;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 28px;
+}
+
+header p {
+    margin: 8px 0 0;
+    opacity: 0.9;
+}
+
+/* Main Content */
+main {
+    max-width: 1100px;
+    margin: 35px auto;
+    padding: 0 24px;
+}
+
+h2 {
+    color: #24292f;
+    margin-top: 30px;
+}
+
+main > p {
+    color: #697381;
+}
+
+/* Filters */
+label {
+    display: inline-block;
+    font-weight: 600;
+    margin: 15px 8px 8px 0;
+}
+
+select {
+    padding: 10px 14px;
+    border: 1px solid #ced3da;
+    border-radius: 8px;
+    background-color: white;
+    font-size: 14px;
+    margin-right: 15px;
+    min-width: 150px;
+}
+
+select:focus {
+    outline: 2px solid #9a1830;
+}
+
+/* Refresh Button */
+button {
+    background-color: #9a1830;
+    color: white;
+    padding: 11px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+button:hover {
+    background-color: #7e1226;
+}
+
+button:focus-visible {
+    outline: 3px solid #246fc3;
+    outline-offset: 3px;
+}
+
+/* Status Message */
+#statusMessage {
+    margin-top: 20px;
+    font-weight: 500;
+}
+
+/* Court Cards */
+#courtList {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+    margin-top: 25px;
+}
+
+.court-card {
+    background-color: white;
+    padding: 22px;
+    border-radius: 12px;
+    border: 1px solid #e1e4e8;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.court-card h3 {
+    margin-top: 0;
+    color: #9a1830;
+    font-size: 20px;
+}
+
+.court-card p {
+    color: #59636e;
+    line-height: 1.5;
+}
+
+/* Court Availability Status */
+.status-available {
+    color: #137547 !important;
+    background-color: #e0f5e9;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.status-occupied {
+    color: #9a5300 !important;
+    background-color: #fff0d7;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.status-closed {
+    color: #59636e !important;
+    background-color: #edf0f2;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+/* Mobile Responsive Design */
+@media (max-width: 600px) {
+    header {
+        padding: 20px;
+    }
+
+    main {
+        padding: 0 16px;
+    }
+
+    select {
+        display: block;
+        width: 100%;
+        margin-bottom: 12px;
+    }
+
+    #courtList {
+        grid-template-columns: 1fr;
+    }
+}
