@@ -76,11 +76,14 @@ public class QueueController {
         return ResponseEntity.noContent().build();
     }
 
-    // public (For epic 2)
-
+    //Epic 2 uses this. no errors for closed sports
     @GetMapping("/count")
-    public Map<String, Long> count(@RequestParam String gym, @RequestParam String sport) {
-        return Map.of("waitingCount", queueService.getWaitingCount(runId(gym, sport)));
+    public Map<String, Object> count(@RequestParam String gym, @RequestParam String sport) {
+        Long id = courtService.activeRunId(gym, sport);
+        if (id == null) {
+            return Map.of("queueActive", false, "waitingCount", 0L);
+        }
+        return Map.of("queueActive", true, "waitingCount", queueService.getWaitingCount(id));
     }
 
     // errors
