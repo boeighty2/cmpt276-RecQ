@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RecQ | Logged Out</title><link rel="stylesheet" href="/css/epic3.css" th:href="@{/css/epic3.css}"></head>
+<body>
+<header class="site-header"><div class="wrap header-inner"><div class="brand">SFU <strong>RecQ</strong><span class="brand-sub">Staff Console</span></div></div></header>
+<main class="wrap logged-out-page"><h1>You're logged out</h1>
+<a class="action-link" th:if="${devMode}" th:href="@{/dev/staff-login}">Sign in again</a>
+
+</main></body></html>

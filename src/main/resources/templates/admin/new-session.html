@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RecQ | Add a Sport</title><link rel="stylesheet" th:href="@{/css/epic3.css}" href="/css/epic3.css"><link rel="stylesheet" th:href="@{/css/epic3-navigation.css}" href="/css/epic3-navigation.css"></head>
+<body>
+<header class="site-header"><div class="wrap header-inner"><div class="brand">SFU <strong>RecQ</strong><span class="brand-sub">Staff Console</span></div><div class="header-actions"><div th:replace="~{admin/fragments/staff-menu :: menu}"></div></div></div></header>
+<main class="wrap">
+<nav class="crumbs"><a th:href="@{/admin/courts}">All Venues</a><span>›</span><strong>Add Sport</strong></nav>
+<div class="page-heading"><div class="recq-heading-title"><a class="recq-back-arrow" id="recq-back-add-sport" th:href="@{/admin/courts}" href="/admin/courts" aria-label="Back to all venues" title="Back to all venues"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5m7 7-7-7 7-7"/></svg></a><div><p class="eyebrow">ADMIN · FACILITY MANAGEMENT</p><h1>Add a sport</h1></div></div></div>
+<div class="flash error" role="alert" th:if="${error}" th:text="${error}"></div>
+<form class="session-form" th:action="@{/admin/courts/new}" th:object="${form}" method="post">
+<div class="form-section-title"><span class="number-chip">1</span><h2>Venue and sport</h2></div>
+<div class="form-grid">
+<div class="field"><label for="gym">Venue / Location *</label><input id="gym" th:field="*{gym}" list="known-venues" maxlength="100" required placeholder="e.g. East Gym"><datalist id="known-venues"><option th:each="venue : ${existingVenues}" th:value="${venue}"></option></datalist></div>
+<div class="field"><label for="sport">Sport *</label><input id="sport" th:field="*{sport}" list="known-sports" maxlength="100" required placeholder="e.g. Badminton"><datalist id="known-sports"><option th:each="name : ${existingSports}" th:value="${name}"></option></datalist></div>
+</div>
+<div class="form-section-title"><span class="number-chip">2</span><h2>How many courts?</h2></div>
+<div class="form-grid"><div class="field"><label for="courtCount">Number of courts *</label><input id="courtCount" th:field="*{courtCount}" type="number" min="1" max="30" step="1" required></div></div>
+<div class="form-actions"><button type="submit" class="primary create-button">Add sport &amp; courts</button><a th:href="@{/admin/courts}" class="text-link">Cancel</a></div>
+</form>
+</main></body></html>

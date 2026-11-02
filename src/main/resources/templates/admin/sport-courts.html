@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>RecQ | Manage Courts</title><link rel="stylesheet" th:href="@{/css/epic3.css}" href="/css/epic3.css"><link rel="stylesheet" th:href="@{/css/epic3-queue-tabs.css}" href="/css/epic3-queue-tabs.css"><link rel="stylesheet" th:href="@{/css/epic3-navigation.css}" href="/css/epic3-navigation.css"></head>
+<body><header class="site-header"><div class="wrap header-inner"><div class="brand">SFU <strong>RecQ</strong><span class="brand-sub">Staff Console</span></div><div class="header-actions"><div th:replace="~{admin/fragments/staff-menu :: menu}"></div></div></div></header>
+<main class="wrap">
+<nav class="crumbs"><a th:href="@{/admin/courts}">All Venues</a><span>›</span><a th:href="@{/admin/courts/venue(gym=${gym})}" th:text="${gym}">East Gym</a><span>›</span><strong th:text="${sport}">Badminton</strong></nav>
+<div class="page-heading"><div class="recq-heading-title"><a class="recq-back-arrow" th:href="@{/admin/courts/venue(gym=${gym})}" href="/admin/courts" aria-label="Back to venue" title="Back to venue"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5m7 7-7-7 7-7"/></svg></a><div><p class="eyebrow" th:text="${gym}">VENUE</p><h1 th:text="${sport}">Badminton</h1></div></div>
+<div class="status-large" th:classappend="${sportIsOpen} ? ' status-large-open' : ' status-large-closed'" th:text="${sportIsOpen} ? 'OPEN' : 'CLOSED'">CLOSED</div></div>
+<div class="flash success" role="status" th:if="${success}" th:text="${success}"></div><div class="flash error" role="alert" th:if="${error}" th:text="${error}"></div>
+<!-- Epic 3 navigation: no fabricated queue participants until Epic 4 provides data. -->
+<div class="recq-tabs" role="tablist" aria-label="Sport management sections">
+  <button id="recq-tab-courts" type="button" class="recq-tab" role="tab"
+          aria-controls="recq-panel-courts" aria-selected="true" tabindex="0">Courts</button>
+  <button id="recq-tab-queue" type="button" class="recq-tab" role="tab"
+          aria-controls="recq-panel-queue" aria-selected="false" tabindex="-1">Waiting Queue</button>
+</div>
+<section id="recq-panel-courts" class="recq-tab-panel" role="tabpanel"
+         aria-labelledby="recq-tab-courts" tabindex="0">
+<div class="closed-sport-banner" th:unless="${sportIsOpen}"><strong>SPORT CLOSED</strong><a th:href="@{/admin/courts/venue(gym=${gym})}">Back to venue to open this sport →</a></div>
+<section class="session-tools court-toolbar" aria-label="Court maintenance"><div class="court-management-toggle"><button type="button" id="court-manage-toggle" class="manage-toggle" aria-expanded="false" aria-controls="court-add-form court-list">Manage</button>
+<form id="court-add-form" class="court-edit-control" th:action="@{/admin/courts/sport/court/{id}/add(id=${firstCourtId})}" method="post" hidden><button type="submit" class="primary">+ Add Court</button></form></div></section>
+<section class="stats" aria-label="Court status summary"><div class="stat"><strong th:text="${availableCount}">3</strong><span>Available</span></div><div class="stat"><strong th:text="${occupiedCount}">0</strong><span>Occupied</span></div><div class="stat"><strong th:text="${closedCount}">0</strong><span>Closed courts</span></div></section>
+<section class="court-list" id="court-list" aria-label="Individual courts"><article class="court" th:each="court : ${courts}" th:classappend="${!sportIsOpen} ? ' inactive-court' : ''">
+<div class="court-title"><h2 th:text="${court.courtName}">Court 1</h2><span class="tag" th:classappend="${court.status.name().toLowerCase()}" th:text="${court.status}">AVAILABLE</span></div>
+<div class="actions"><form th:if="${court.status.name() != 'AVAILABLE'}" th:action="@{/admin/courts/sport/court/{id}/status(id=${court.id})}" method="post"><input type="hidden" name="status" value="AVAILABLE"><button class="primary" type="submit" th:text="${court.status.name() == 'CLOSED' ? 'Reopen Court' : 'Mark Available'}">Mark Available</button></form>
+<form th:if="${sportIsOpen and court.status.name() != 'OCCUPIED'}" th:action="@{/admin/courts/sport/court/{id}/status(id=${court.id})}" method="post"><input type="hidden" name="status" value="OCCUPIED"><button type="submit">Mark Occupied</button></form>
+<form th:if="${court.status.name() != 'CLOSED'}" th:action="@{/admin/courts/sport/court/{id}/status(id=${court.id})}" method="post"><input type="hidden" name="status" value="CLOSED"><button type="submit">Close Court</button></form>
+<form class="court-edit-control" hidden th:if="${courts.size() > 1 and court.status.name() != 'OCCUPIED'}" th:action="@{/admin/courts/sport/court/{id}/delete(id=${court.id})}" method="post" onsubmit="return confirm('Delete this court? This cannot be undone.');"><button type="submit" class="danger-quiet">Delete</button></form>
+</div></article></section>
+
+</section>
+<section id="recq-panel-queue" class="recq-tab-panel" role="tabpanel"
+         aria-labelledby="recq-tab-queue" tabindex="0" hidden>
+  <div class="recq-queue-card">
+    <div class="recq-queue-head">
+      <h2>Waiting Queue</h2>
+      <span class="recq-queue-status">Not connected</span>
+    </div>
+    <div class="recq-queue-columns" aria-hidden="true">
+      <span>Position</span><span>Participant</span><span>Status</span>
+    </div>
+    <p class="recq-queue-empty" role="status">Queue data unavailable</p>
+  </div>
+</section>
+</main>
+<script>(function(){const toggle=document.getElementById('court-manage-toggle');const controls=document.querySelectorAll('.court-edit-control');if(!toggle)return;const restoreKey='recq-epic3-sport-manage';const sportId=new URLSearchParams(window.location.search);const key=sportId.get('gym')+'|'+sportId.get('sport');function display(on){toggle.setAttribute('aria-expanded',String(on));toggle.textContent=on?'Done':'Manage';controls.forEach(c=>c.hidden=!on);}toggle.addEventListener('click',()=>display(toggle.getAttribute('aria-expanded')!=='true'));if(sessionStorage.getItem(restoreKey)===key)display(true);sessionStorage.removeItem(restoreKey);controls.forEach(form=>{if(form.tagName==='FORM')form.addEventListener('submit',()=>sessionStorage.setItem(restoreKey,key));});}());</script>
+
+<script>
+(function () {
+  const buttons = [document.getElementById('recq-tab-courts'), document.getElementById('recq-tab-queue')];
+  const panels = [document.getElementById('recq-panel-courts'), document.getElementById('recq-panel-queue')];
+
+  function choose(index, moveFocus = false) {
+    buttons.forEach((button, position) => {
+      const selected = position === index;
+      button.setAttribute('aria-selected', String(selected));
+      button.tabIndex = selected ? 0 : -1;
+      panels[position].hidden = !selected;
+    });
+    if (moveFocus) buttons[index].focus();
+  }
+
+  buttons.forEach((button, index) => {
+    button.addEventListener('click', () => choose(index));
+    button.addEventListener('keydown', event => {
+      if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+        event.preventDefault();
+        choose((index + (event.key === 'ArrowRight' ? 1 : buttons.length - 1)) % buttons.length, true);
+      } else if (event.key === 'Home' || event.key === 'End') {
+        event.preventDefault();
+        choose(event.key === 'Home' ? 0 : buttons.length - 1, true);
+      }
+    });
+  });
+}());
+</script>
+</body></html>

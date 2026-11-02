@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Epic 3 local-only H2 demo database ###
+recq-dev.mv.db
+recq-dev.trace.db
