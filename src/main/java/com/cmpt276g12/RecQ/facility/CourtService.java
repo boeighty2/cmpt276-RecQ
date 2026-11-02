@@ -8,6 +8,7 @@ import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import com.cmpt276g12.RecQ.queue.QueueService;
 
 @Service
 public class CourtService {
@@ -132,7 +133,11 @@ public class CourtService {
             } else {
                 runRepository.findFirstByGymNameIgnoreCaseAndSportNameIgnoreCaseAndClosedAtIsNullOrderByOpenedAtDesc(
                     selected.get(0).getGymName(), selected.get(0).getSportName())
-                    .ifPresent(run -> { run.close(); runRepository.save(run); });
+                    .ifPresent(run -> {
+                        if (queueService != null) queueService.closeQueue(run.getId());
+                        run.close();
+                        runRepository.save(run);
+                    });
             }
         }
         return selected.size();
@@ -234,7 +239,14 @@ public class CourtService {
         if (runRepository != null) {
             runRepository.findFirstByGymNameIgnoreCaseAndSportNameIgnoreCaseAndClosedAtIsNullOrderByOpenedAtDesc(
                 selected.get(0).getGymName(), selected.get(0).getSportName())
-                .ifPresent(run -> { run.close(); runRepository.save(run); });
+                .ifPresent(run -> {
+                    if (queueService != null && queueService.hasActiveEntries(run.getId())) {
+                        throw new IllegalArgumentException(
+                            "Cannot delete this sport while people are queued. Close it first to clear the queue.");
+                    }
+                    run.close();
+                    runRepository.save(run);
+                });
         }
         repository.deleteAll(selected);
         // Keep the CLOSED run audit history; the sport may be re-created later.
@@ -284,5 +296,12 @@ public class CourtService {
             throw new IllegalArgumentException(label + " must be between 1 and 100 characters.");
         }
         return cleaned;
+    }
+    
+    private QueueService queueService; // null in unit tests that build CourtService by hand
+
+    @Autowired(required = false)
+    void setQueueService(QueueService queueService) {
+        this.queueService = queueService;
     }
 }
