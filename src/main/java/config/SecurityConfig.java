@@ -1,3 +1,4 @@
+
 package ca.example.login.config;
 
 import org.springframework.context.annotation.Bean;
@@ -9,6 +10,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class SecurityConfig {
+
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -27,7 +29,17 @@ public class SecurityConfig {
                 .loginProcessingUrl("/login")
                 .usernameParameter("username")
                 .passwordParameter("password")
-                .defaultSuccessUrl("/", true)
+                .successHandler((request, response, authentication) -> {
+                    boolean isAdmin = authentication.getAuthorities().stream()
+                        .anyMatch(authority ->
+                            authority.getAuthority().equals("ROLE_ADMIN"));
+
+                    if (isAdmin) {
+                        response.sendRedirect("/new-session");
+                    } else {
+                        response.sendRedirect("/facilities");
+                    }
+                })
                 .failureUrl("/login?error")
                 .permitAll()
             )
@@ -35,6 +47,7 @@ public class SecurityConfig {
                 .logoutSuccessUrl("/login?logout")
                 .permitAll()
             );
+
         return http.build();
     }
 }
