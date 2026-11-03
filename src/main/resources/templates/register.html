@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Create account</title><link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<main class="panel">
+  <h1>Create an account</h1>
+  <p class="notice error" th:if="${registrationError}" th:text="${registrationError}"></p>
+  <form th:action="@{/register}" th:object="${form}" method="post">
+    <label for="email">Email</label>
+    <input id="email" th:field="*{email}" type="email" autocomplete="email" required>
+    <small class="error" th:errors="*{email}"></small>
+
+    <label for="username">Username</label>
+    <input id="username" th:field="*{username}" autocomplete="username" required>
+    <small class="error" th:errors="*{username}"></small>
+
+    <label for="password">Password (at least 8 characters)</label>
+    <input id="password" th:field="*{password}" type="password" autocomplete="new-password" required>
+    <small class="error" th:errors="*{password}"></small>
+
+    <label for="confirmPassword">Confirm password</label>
+    <input id="confirmPassword" th:field="*{confirmPassword}" type="password" autocomplete="new-password" required>
+    <small class="error" th:errors="*{confirmPassword}"></small>
+
+    <label for="role">Account type</label>
+    <select id="role" th:field="*{role}">
+      <option value="USER">User</option>
+      <option value="ADMIN">Admin (requires invite code)</option>
+    </select>
+
+    <label for="adminInviteCode">Admin invite code (admin accounts only)</label>
+    <input id="adminInviteCode" th:field="*{adminInviteCode}" type="password" autocomplete="off">
+
+    <button type="submit">Create account</button>
+  </form>
+  <p>Already have an account? <a th:href="@{/login}">Log in</a></p>
+</main>
+</body></html>
