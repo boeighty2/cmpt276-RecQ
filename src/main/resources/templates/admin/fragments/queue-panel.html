@@ -1,0 +1,77 @@
+<div th:fragment="queuePanel(gym, sport, runId)" class="queue-panel"
+     th:attr="data-gym=${gym},data-sport=${sport}">
+
+  <p th:if="${runId == null}">
+    This sport is closed, so there is no queue. Open it to start accepting check-ins.
+  </p>
+
+  <div th:if="${runId != null}">
+    <div>
+      <input class="qp-user" type="number" placeholder="Participant user ID">
+      <button class="qp-add" type="button">Check in &amp; add</button>
+    </div>
+    <p class="qp-msg" style="color:#b00020"></p>
+
+    <table>
+      <thead>
+        <tr><th>#</th><th>User</th><th>Entry</th><th>Status</th><th>Joined</th><th></th></tr>
+      </thead>
+      <tbody class="qp-rows"></tbody>
+    </table>
+
+    <script th:inline="none">
+      (function () {
+        const panel = document.currentScript.closest(".queue-panel");
+        const q = "gym=" + encodeURIComponent(panel.dataset.gym) +
+                  "&sport=" + encodeURIComponent(panel.dataset.sport);
+        const msg = panel.querySelector(".qp-msg");
+        const rows = panel.querySelector(".qp-rows");
+
+        async function errorText(res) {
+          try { return (await res.json()).error || ("Error " + res.status); }
+          catch (e) { return "Error " + res.status; }
+        }
+
+        async function load() {
+          const res = await fetch("/api/queue?" + q);
+          if (!res.ok) {
+            rows.innerHTML = "";
+            msg.textContent = await errorText(res);
+            return;
+          }
+          msg.textContent = "";
+          const queue = await res.json();
+          rows.innerHTML = "";
+          queue.forEach(function (e, i) {
+            const tr = document.createElement("tr");
+            tr.innerHTML = "<td>" + (i + 1) + "</td><td>" + e.userId + "</td><td>" + e.id +
+              "</td><td>" + e.status + "</td><td>" +
+              new Date(e.joinedAt).toLocaleTimeString() +
+              "</td><td><button type='button' data-id='" + e.id + "'>Remove</button></td>";
+            rows.appendChild(tr);
+          });
+        }
+
+        panel.querySelector(".qp-add").addEventListener("click", async function () {
+          const input = panel.querySelector(".qp-user");
+          if (!input.value) return;
+          const res = await fetch("/api/queue/join?" + q + "&userId=" + input.value,
+                                  { method: "POST" });
+          msg.textContent = res.ok ? "" : await errorText(res);
+          input.value = "";
+          load();
+        });
+
+        rows.addEventListener("click", async function (ev) {
+          const id = ev.target.dataset.id;
+          if (!id) return;
+          await fetch("/api/queue/entries/" + id + "/remove", { method: "POST" });
+          load();
+        });
+
+        load();
+        setInterval(load, 5000);
+      })();
+    </script>
+  </div>
+</div>
