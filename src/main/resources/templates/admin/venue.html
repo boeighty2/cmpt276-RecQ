@@ -17,6 +17,19 @@
 <div class="sport-panel-body">
 
 <p class="muted compact" th:if="${item.open()}" th:text="${item.total()} + (${item.total()} == 1 ? ' court' : ' courts') + ' · ' + ${item.available()} + ' available'">6 courts</p>
+<p class="muted compact" th:if="${item.open()}"
+   th:attr="data-queue-gym=${gym},data-queue-sport=${item.name()}"
+   style="display: flex; align-items: center; gap: 7px;">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+       stroke-linejoin="round" aria-hidden="true" focusable="false"
+       style="flex-shrink: 0;">
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+    <circle cx="9" cy="7" r="4"/>
+    <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+  </svg>
+  <span>Waiting queue: <span data-waiting-count>...</span></span>
+</p>
 <p class="muted compact" th:unless="${item.open()}" th:text="${item.total()} + (${item.total()} == 1 ? ' court' : ' courts') + ' configured'">6 courts configured</p>
 <a class="tile-link" th:href="@{/admin/courts/sport(gym=${gym},sport=${item.name()})}">View and manage courts →</a>
 <div class="card-config-actions sport-config-control" hidden>
@@ -85,6 +98,36 @@
     document.querySelectorAll('[data-cancel-modal]').forEach(button => {
         button.addEventListener('click', () => button.closest('dialog').close());
     });
+}());
+</script>
+<script>
+// The queue count is read-only and comes from Epic 4's public API.
+(function () {
+    const summaries = document.querySelectorAll('[data-queue-gym][data-queue-sport]');
+    if (!summaries.length) return;
+
+    async function updateCount(summary) {
+        const value = summary.querySelector('[data-waiting-count]');
+        const params = new URLSearchParams({
+            gym: summary.dataset.queueGym,
+            sport: summary.dataset.queueSport
+        });
+        try {
+            const response = await fetch('/api/queue/count?' + params.toString(), { cache: 'no-store' });
+            if (!response.ok) throw new Error('Queue count unavailable');
+            const queue = await response.json();
+            const count = queue.queueActive === true &&
+                Number.isSafeInteger(queue.waitingCount) && queue.waitingCount >= 0
+                ? String(queue.waitingCount) : 'Unavailable';
+            if (value.textContent !== count) value.textContent = count;
+        } catch (error) {
+            if (value.textContent !== 'Unavailable') value.textContent = 'Unavailable';
+        }
+    }
+
+    function refreshCounts() { summaries.forEach(updateCount); }
+    refreshCounts();
+    setInterval(refreshCounts, 5000);
 }());
 </script>
 </body></html>
