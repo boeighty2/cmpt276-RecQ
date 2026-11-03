@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SFU RecQ - Facility Discovery</title>
+    <link rel="stylesheet" href="/css/epic2.css">
+    <script src="/js/facilities.js" defer></script>
+</head>
+
+<body>
+
+    <header>
+        <h1>SFU RecQ</h1>
+        <p>Facility Discovery & Availability</p>
+    </header>
+
+    <main>
+
+        <h2>Find a Sports Facility</h2>
+
+        <p>
+            Check court availability before visiting the gym.
+        </p>
+
+        <!-- Sport Selection -->
+        <label for="sport">Select Sport:</label>
+        <select id="sport">
+            <option value="">All Sports</option>
+        </select>
+
+        <!-- Gym Selection -->
+        <label for="gym">Select Gym:</label>
+        <select id="gym">
+            <option value="">All Gyms</option>
+        </select>
+
+        <!-- Session Selection -->
+        <label for="session">Select Session:</label>
+        <select id="session">
+            <option value="">All Sessions</option>
+        </select>
+
+        <h2>Court Availability</h2>
+
+        <button id="refreshButton" type="button">
+            Refresh Availability
+        </button>
+
+        <p id="statusMessage" role="status">
+            Loading court information...
+        </p>
+
+        <!-- Court information will appear here -->
+        <div id="courtList"></div>
+
+    </main>
+
+</body>
+</html>
