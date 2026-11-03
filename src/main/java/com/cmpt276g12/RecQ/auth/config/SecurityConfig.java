@@ -1,4 +1,3 @@
-
 package com.cmpt276g12.RecQ.auth.config;
 
 import org.springframework.context.annotation.Bean;
@@ -20,10 +19,10 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login", "/register", "/css/**").permitAll()
-                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/login", "/register", "/css/**", "/js/**", "/error", "/facilities/**", "/queue.html", "/api/**", "/dev/**", "/admin/**").permitAll()
                 .anyRequest().authenticated()
             )
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**", "/admin/**"))
             .formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
@@ -34,8 +33,12 @@ public class SecurityConfig {
                         .anyMatch(authority ->
                             authority.getAuthority().equals("ROLE_ADMIN"));
 
+                    var session = request.getSession();
+                    session.setAttribute("role", isAdmin ? "ADMIN" : "PARTICIPANT");
+                    session.setAttribute("displayName", authentication.getName());
+                    
                     if (isAdmin) {
-                        response.sendRedirect("/new-session");
+                        response.sendRedirect("/admin/courts");
                     } else {
                         response.sendRedirect("/facilities");
                     }
