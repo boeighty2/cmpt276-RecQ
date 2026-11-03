@@ -1,4 +1,4 @@
-package ca.example.login.model;
+package com.cmpt276g12.RecQ.auth.model;
 
 import jakarta.persistence.*;
 

@@ -1,6 +1,6 @@
-package ca.example.login.repository;
+package com.cmpt276g12.RecQ.auth.repository;
 
-import ca.example.login.model.AppUser;
+import com.cmpt276g12.RecQ.auth.model.AppUser;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 

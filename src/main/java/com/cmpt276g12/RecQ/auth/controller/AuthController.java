@@ -1,7 +1,7 @@
-package ca.example.login.controller;
+package com.cmpt276g12.RecQ.auth.controller;
 
-import ca.example.login.model.Role;
-import ca.example.login.service.RegistrationService;
+import com.cmpt276g12.RecQ.auth.model.Role;
+import com.cmpt276g12.RecQ.auth.service.RegistrationService;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

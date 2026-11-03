@@ -1,5 +1,5 @@
 
-package ca.example.login.config;
+package com.cmpt276g12.RecQ.auth.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
