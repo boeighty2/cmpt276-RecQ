@@ -1,7 +1,7 @@
-package ca.example.login.service;
+package com.cmpt276g12.RecQ.auth.service;
 
-import ca.example.login.model.AppUser;
-import ca.example.login.repository.AppUserRepository;
+import com.cmpt276g12.RecQ.auth.model.AppUser;
+import com.cmpt276g12.RecQ.auth.repository.AppUserRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
