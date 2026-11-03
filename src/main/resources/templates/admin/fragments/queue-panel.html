@@ -1,76 +1,210 @@
-<div th:fragment="queuePanel(gym, sport, runId)" class="queue-panel"
+
+<div th:fragment="queuePanel(gym, sport, runId)"
+     class="queue-panel"
      th:attr="data-gym=${gym},data-sport=${sport}">
 
   <p th:if="${runId == null}">
-    This sport is closed, so there is no queue. Open it to start accepting check-ins.
+    This sport is closed, so there is no queue.
+    Open it to start accepting check-ins.
   </p>
 
   <div th:if="${runId != null}">
+
+    <!-- Epic 4: Staff check-in -->
     <div>
-      <input class="qp-user" type="number" placeholder="Participant user ID">
-      <button class="qp-add" type="button">Check in &amp; add</button>
+      <input class="qp-user" type="number"
+             placeholder="Participant user ID">
+      <button class="qp-add" type="button">
+        Check in &amp; add
+      </button>
     </div>
-    <p class="qp-msg" style="color:#b00020"></p>
+
+    <!-- Epic 5: Call next -->
+    <div style="margin-top: 12px;">
+      <button class="qp-next" type="button">
+        Call Next
+      </button>
+    </div>
+
+    <p class="qp-msg" role="status"></p>
 
     <table>
       <thead>
-        <tr><th>#</th><th>User</th><th>Entry</th><th>Status</th><th>Joined</th><th></th></tr>
+        <tr>
+          <th>#</th>
+          <th>User</th>
+          <th>Entry</th>
+          <th>Status</th>
+          <th>Joined</th>
+          <th>Actions</th>
+        </tr>
       </thead>
       <tbody class="qp-rows"></tbody>
     </table>
 
     <script th:inline="none">
       (function () {
-        const panel = document.currentScript.closest(".queue-panel");
-        const q = "gym=" + encodeURIComponent(panel.dataset.gym) +
-                  "&sport=" + encodeURIComponent(panel.dataset.sport);
+
+        const panel =
+          document.currentScript.closest(".queue-panel");
+
+        const q =
+          "gym=" + encodeURIComponent(panel.dataset.gym) +
+          "&sport=" + encodeURIComponent(panel.dataset.sport);
+
         const msg = panel.querySelector(".qp-msg");
         const rows = panel.querySelector(".qp-rows");
+        const nextButton = panel.querySelector(".qp-next");
 
         async function errorText(res) {
-          try { return (await res.json()).error || ("Error " + res.status); }
-          catch (e) { return "Error " + res.status; }
+          try {
+            return (await res.json()).error ||
+              ("Error " + res.status);
+          } catch (e) {
+            return "Error " + res.status;
+          }
         }
 
+        // Load current queue
         async function load() {
+
           const res = await fetch("/api/queue?" + q);
+
           if (!res.ok) {
             rows.innerHTML = "";
             msg.textContent = await errorText(res);
             return;
           }
-          msg.textContent = "";
+
           const queue = await res.json();
           rows.innerHTML = "";
+
           queue.forEach(function (e, i) {
+
             const tr = document.createElement("tr");
-            tr.innerHTML = "<td>" + (i + 1) + "</td><td>" + e.userId + "</td><td>" + e.id +
-              "</td><td>" + e.status + "</td><td>" +
+
+            // Only OFFERED users can be confirmed
+            const confirmButton =
+              e.status === "OFFERED"
+                ? "<button type='button' " +
+                  "data-action='confirm' data-id='" +
+                  e.id + "'>Confirm Turn</button>"
+                : "";
+
+            const removeButton =
+              "<button type='button' " +
+              "data-action='remove' data-id='" +
+              e.id + "'>Remove</button>";
+
+            tr.innerHTML =
+              "<td>" + (i + 1) + "</td>" +
+              "<td>" + e.userId + "</td>" +
+              "<td>" + e.id + "</td>" +
+              "<td>" + e.status + "</td>" +
+              "<td>" +
               new Date(e.joinedAt).toLocaleTimeString() +
-              "</td><td><button type='button' data-id='" + e.id + "'>Remove</button></td>";
+              "</td>" +
+              "<td>" + confirmButton + " " +
+              removeButton + "</td>";
+
             rows.appendChild(tr);
           });
         }
 
-        panel.querySelector(".qp-add").addEventListener("click", async function () {
-          const input = panel.querySelector(".qp-user");
-          if (!input.value) return;
-          const res = await fetch("/api/queue/join?" + q + "&userId=" + input.value,
-                                  { method: "POST" });
-          msg.textContent = res.ok ? "" : await errorText(res);
-          input.value = "";
-          load();
+        // Epic 4: Add participant
+        panel.querySelector(".qp-add")
+          .addEventListener("click", async function () {
+
+            const input = panel.querySelector(".qp-user");
+            if (!input.value) return;
+
+            const res = await fetch(
+              "/api/queue/join?" + q +
+              "&userId=" + encodeURIComponent(input.value),
+              { method: "POST" }
+            );
+
+            if (!res.ok) {
+              msg.textContent = await errorText(res);
+            } else {
+              msg.textContent = "Participant added.";
+            }
+
+            input.value = "";
+            await load();
+          });
+
+        // Epic 5: Call next participant
+        nextButton.addEventListener("click", async function () {
+
+          nextButton.disabled = true;
+
+          try {
+            const res = await fetch("/api/turn/next?" + q, {
+              method: "POST"
+            });
+
+            if (!res.ok) {
+              msg.textContent = await errorText(res);
+              return;
+            }
+
+            await load();
+            msg.textContent = "Next participant called!";
+
+          } catch (error) {
+            msg.textContent = "Unable to contact server.";
+          } finally {
+            nextButton.disabled = false;
+          }
         });
 
+        // Epic 4 + Epic 5: Remove or confirm
         rows.addEventListener("click", async function (ev) {
-          const id = ev.target.dataset.id;
-          if (!id) return;
-          await fetch("/api/queue/entries/" + id + "/remove", { method: "POST" });
-          load();
+
+          const button = ev.target.closest(
+            "button[data-id][data-action]"
+          );
+
+          if (!button) return;
+
+          const id = button.dataset.id;
+          const action = button.dataset.action;
+
+          const url = action === "confirm"
+            ? "/api/turn/" + id + "/confirm"
+            : "/api/queue/entries/" + id + "/remove";
+
+          button.disabled = true;
+
+          try {
+            const res = await fetch(url, {
+              method: "POST"
+            });
+
+            if (!res.ok) {
+              msg.textContent = await errorText(res);
+              return;
+            }
+
+            await load();
+
+            msg.textContent = action === "confirm"
+              ? "Turn confirmed successfully!"
+              : "Participant removed.";
+
+          } catch (error) {
+            msg.textContent = "Unable to contact server.";
+          } finally {
+            button.disabled = false;
+          }
         });
 
         load();
+
+        // Refresh queue every 5 seconds
         setInterval(load, 5000);
+
       })();
     </script>
   </div>
