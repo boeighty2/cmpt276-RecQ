@@ -4,7 +4,6 @@ let allCourts = [];
 
 const sportSelect = document.getElementById("sport");
 const gymSelect = document.getElementById("gym");
-const sessionSelect = document.getElementById("session");
 
 const courtList = document.getElementById("courtList");
 const statusMessage = document.getElementById("statusMessage");
@@ -157,7 +156,7 @@ function updateSelect(select, values, defaultText) {
     }
 }
 
-// Populate Sport, Gym, and Session selections
+// Populate Sport and Gym selections
 function updateFilters() {
     updateSelect(
         sportSelect,
@@ -170,12 +169,6 @@ function updateFilters() {
         allCourts.map(court => court.gymName),
         "All Gyms"
     );
-
-    updateSelect(
-        sessionSelect,
-        allCourts.map(court => court.sessionName),
-        "All Sessions"
-    );
 }
 
 // Display courts based on selected filters
@@ -187,15 +180,12 @@ function displayCourts() {
     loadWaitingCount();
 
     const filteredCourts = allCourts.filter(court => {
-        return (
-            (!sportSelect.value ||
-                court.sportName === sportSelect.value) &&
+    return (
+        (!sportSelect.value ||
+            court.sportName === sportSelect.value) &&
 
-            (!gymSelect.value ||
-                court.gymName === gymSelect.value) &&
-
-            (!sessionSelect.value ||
-                court.sessionName === sessionSelect.value)
+        (!gymSelect.value ||
+            court.gymName === gymSelect.value)
         );
     });
 
@@ -220,10 +210,6 @@ function displayCourts() {
         location.textContent =
             `${court.gymName} | ${court.sportName}`;
 
-        const session = document.createElement("p");
-        session.textContent =
-            `Session: ${court.sessionName}`;
-
         const status = document.createElement("p");
         status.textContent =
             `Status: ${court.status}`;
@@ -231,7 +217,7 @@ function displayCourts() {
         status.className =
             `status-${String(court.status).toLowerCase()}`;
 
-        card.append(title, location, session, status);
+        card.append(title, location, status);
 
         courtList.appendChild(card);
     });
@@ -240,7 +226,6 @@ function displayCourts() {
 // Filter when selections change
 sportSelect.addEventListener("change", displayCourts);
 gymSelect.addEventListener("change", displayCourts);
-sessionSelect.addEventListener("change", displayCourts);
 
 // Refresh button
 refreshButton.addEventListener("click", loadCourts);
