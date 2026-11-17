@@ -13,9 +13,9 @@
     <header>
         <h1>SFU RecQ</h1>
         <p>Facility Discovery & Availability</p>
-        <button id="logoutButton" type="button">
-            Logout
-        </button>
+        <form th:action="@{/logout}" method="post">
+            <button id="logoutButton" type="submit">Logout</button>
+        </form>
     </header>
 
     <main>
