@@ -5,6 +5,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>RecQ | Choose a Venue</title>
     <link rel="stylesheet" th:href="@{/css/epic3.css}" href="/css/epic3.css">
+    <style>
+        .venue-filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 22px;
+        }
+        .venue-filter-bar input,
+        .venue-filter-bar select {
+            box-sizing: border-box;
+            padding: 12px 18px;
+            border: 1px solid #cbd2da;
+            border-radius: 999px;
+            background-color: #fff;
+            color: #24292f;
+            font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+            font-size: 14px;
+        }
+        .venue-filter-bar input {
+            flex: 1;
+            min-width: 0;
+            font-weight: 400;
+        }
+        .venue-filter-status {
+            position: relative;
+            flex: 0 0 150px;
+        }
+        .venue-filter-bar select {
+            display: block;
+            width: 100%;
+            padding: 12px 36px;
+            appearance: none;
+            -webkit-appearance: none;
+            text-align: center;
+            text-align-last: center;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .venue-filter-status::after {
+            content: "";
+            position: absolute;
+            right: 18px;
+            top: calc(50% - 5px);
+            width: 7px;
+            height: 7px;
+            border-right: 1.5px solid #59636f;
+            border-bottom: 1.5px solid #59636f;
+            transform: rotate(45deg);
+            pointer-events: none;
+        }
+        .venue-filter-bar input:focus-visible,
+        .venue-filter-bar select:focus-visible {
+            outline: 2px solid #9a1830;
+            outline-offset: 2px;
+        }
+        .venue-filter-count {
+            margin: 14px 0 -10px;
+            color: #697381;
+            font-size: 13px;
+        }
+        @media (max-width: 560px) {
+            .venue-filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .venue-filter-status { flex-basis: auto; width: 100%; }
+        }
+    </style>
 </head>
 <body>
 <header class="site-header"><div class="wrap header-inner"><div class="brand">SFU <strong>RecQ</strong><span class="brand-sub">Staff Console</span></div><div class="header-actions"><div th:replace="~{admin/fragments/staff-menu :: menu}"></div></div></div></header>
@@ -12,10 +80,22 @@
     <div class="page-heading"><div><p class="eyebrow">ADMIN DASHBOARD</p><h1>Choose a venue</h1></div><div class="venue-top-actions"><button id="home-manage-toggle" class="manage-toggle" type="button" aria-expanded="false" aria-controls="home-add-sport">Manage</button><a id="home-add-sport" class="action-link home-config-control" hidden th:href="@{/admin/courts/new}">+ Add Sport</a></div></div>
     <div class="flash success" role="status" th:if="${success}" th:text="${success}"></div>
     <div class="flash error" role="alert" th:if="${error}" th:text="${error}"></div>
+    <div class="venue-filter-bar">
+        <input type="search" id="venue-search" placeholder="Search venues or sports..."
+               aria-label="Search venues or sports" autocomplete="off">
+        <div class="venue-filter-status">
+            <select id="sport-status-filter" aria-label="Filter by sport status">
+                <option value="all">All</option>
+                <option value="open">Open</option>
+                <option value="closed">Closed</option>
+            </select>
+        </div>
+    </div>
+    <p class="venue-filter-count" id="venue-filter-count" aria-live="polite"></p>
     <section class="tile-grid" aria-label="Gym selection">
         <article class="tile venue-tile" th:each="venue : ${venues}">
             <div class="venue-title-row">
-                <h2 th:text="${venue.name()}">Demo Gym A</h2>
+                <h2 th:text="${venue.name()}">Gym A</h2>
                 <button type="button" class="rename-open-btn home-config-control" hidden
                         th:attr="data-rename-venue=${venue.name()},aria-label=${'Rename ' + venue.name()}">Rename</button>
             </div>
@@ -33,12 +113,13 @@
         </article>
     </section>
     <p class="empty" th:if="${#lists.isEmpty(venues)}">No venues yet.</p>
+    <p class="empty" id="venue-filter-empty" style="display:none" role="status">No matching venues or sports.</p>
 </main>
 <dialog id="rename-venue-dialog" class="epic-modal" aria-labelledby="rename-venue-title">
     <form th:action="@{/admin/courts/venue/rename}" method="post">
         <input type="hidden" name="oldName" id="rename-venue-original">
         <h2 id="rename-venue-title">Rename venue</h2>
-        
+
         <label for="rename-venue-input">Venue name</label>
         <input id="rename-venue-input" type="text" name="newName" maxlength="100" required>
         <div class="modal-actions">
@@ -92,6 +173,52 @@
     document.querySelectorAll('[data-cancel-modal]').forEach(button => {
         button.addEventListener('click', () => button.closest('dialog').close());
     });
+}());
+</script>
+<script>
+(function () {
+    const search = document.getElementById('venue-search');
+    const statusFilter = document.getElementById('sport-status-filter');
+    const venues = document.querySelectorAll('.venue-tile');
+    const count = document.getElementById('venue-filter-count');
+    const emptyMessage = document.getElementById('venue-filter-empty');
+
+    function normalize(text) {
+        return text.toLowerCase().replace(/\s+/g, '');
+    }
+
+    function applyFilters() {
+        const keyword = normalize(search.value);
+        const selectedStatus = statusFilter.value;
+        let visibleVenues = 0;
+
+        venues.forEach(venue => {
+            const venueName = normalize(venue.querySelector('h2').textContent);
+            const venueMatches = venueName.includes(keyword);
+            let visibleSports = 0;
+
+            venue.querySelectorAll('.sport-pill').forEach(sport => {
+                const nameMatches = venueMatches || normalize(sport.textContent).includes(keyword);
+                const statusMatches = selectedStatus === 'all' ||
+                    sport.classList.contains('sport-pill-' + selectedStatus);
+                const visible = nameMatches && statusMatches;
+
+                sport.style.display = visible ? '' : 'none';
+                if (visible) visibleSports++;
+            });
+
+            const visible = visibleSports > 0;
+            venue.style.display = visible ? '' : 'none';
+            if (visible) visibleVenues++;
+        });
+
+        count.textContent = visibleVenues + (visibleVenues === 1 ? ' venue found' : ' venues found');
+        emptyMessage.style.display = venues.length > 0 && visibleVenues === 0 ? '' : 'none';
+    }
+
+    search.addEventListener('input', applyFilters);
+    statusFilter.addEventListener('change', applyFilters);
+    applyFilters();
 }());
 </script>
 </body>
