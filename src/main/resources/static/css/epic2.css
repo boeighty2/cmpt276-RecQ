@@ -195,3 +195,20 @@ button:focus-visible {
         grid-template-columns: 1fr;
     }
 }
+
+/* Logout Button */
+#logoutButton {
+    background-color: white;
+    color: #9a1830;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    float: right;
+}
+
+#logoutButton:hover {
+    background-color: #f0e5e8;
+}
