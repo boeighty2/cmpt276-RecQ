@@ -4,11 +4,16 @@ let allCourts = [];
 
 const sportSelect = document.getElementById("sport");
 const gymSelect = document.getElementById("gym");
-const sessionSelect = document.getElementById("session");
 
 const courtList = document.getElementById("courtList");
 const statusMessage = document.getElementById("statusMessage");
 const refreshButton = document.getElementById("refreshButton");
+
+// Waiting Count elements
+const waitingMessage = document.getElementById("waitingMessage");
+const waitingCountList = document.getElementById("waitingCountList");
+
+let waitingRequestId = 0;
 
 // Get court information from Epic 3 API
 async function loadCourts() {
@@ -37,8 +42,94 @@ async function loadCourts() {
     } catch (error) {
         allCourts = [];
         courtList.replaceChildren();
+
         statusMessage.textContent =
             "Unable to load court information. Please try again.";
+
+        // Clear outdated waiting information
+        waitingRequestId++;
+        waitingCountList.replaceChildren();
+
+        waitingMessage.textContent =
+            "Waiting information is unavailable. Please refresh.";
+
+        console.error(error);
+    }
+}
+
+// Get waiting count from Epic 4 API
+async function loadWaitingCount() {
+
+    const requestId = ++waitingRequestId;
+
+    const gym = gymSelect.value;
+    const sport = sportSelect.value;
+
+    waitingCountList.replaceChildren();
+
+    // A specific gym and sport must be selected
+    if (!gym || !sport) {
+        waitingMessage.textContent =
+            "Select a sport and gym to view waiting information.";
+        return;
+    }
+
+    waitingMessage.textContent =
+        "Loading waiting information...";
+
+    try {
+        const params = new URLSearchParams({
+            gym: gym,
+            sport: sport
+        });
+
+        const response = await fetch(
+            `/api/queue/count?${params.toString()}`,
+            { cache: "no-store" }
+        );
+
+        if (!response.ok) {
+            throw new Error("Failed to load waiting count");
+        }
+
+        const data = await response.json();
+
+        // Ignore outdated responses
+        if (requestId !== waitingRequestId) {
+            return;
+        }
+
+        // Check the response data
+        if (
+            typeof data.queueActive !== "boolean" ||
+            !Number.isInteger(data.waitingCount) ||
+            data.waitingCount < 0
+        ) {
+            throw new Error("Invalid waiting count data");
+        }
+
+        // Sport is closed or has no active queue
+        if (!data.queueActive) {
+            waitingMessage.textContent =
+                `No active queue for ${gym} - ${sport}.`;
+            return;
+        }
+
+        // Display the current waiting count
+        const count = data.waitingCount;
+
+        waitingMessage.textContent =
+            `${gym} - ${sport}: ${count} ` +
+            `${count === 1 ? "person" : "people"} waiting.`;
+
+    } catch (error) {
+
+        if (requestId !== waitingRequestId) {
+            return;
+        }
+
+        waitingMessage.textContent =
+            "Unable to load waiting information. Please try again.";
 
         console.error(error);
     }
@@ -65,7 +156,7 @@ function updateSelect(select, values, defaultText) {
     }
 }
 
-// Populate Sport, Gym, and Session selections
+// Populate Sport and Gym selections
 function updateFilters() {
     updateSelect(
         sportSelect,
@@ -78,12 +169,6 @@ function updateFilters() {
         allCourts.map(court => court.gymName),
         "All Gyms"
     );
-
-    updateSelect(
-        sessionSelect,
-        allCourts.map(court => court.sessionName),
-        "All Sessions"
-    );
 }
 
 // Display courts based on selected filters
@@ -91,16 +176,16 @@ function displayCourts() {
 
     courtList.replaceChildren();
 
+    // Update waiting count when filters change
+    loadWaitingCount();
+
     const filteredCourts = allCourts.filter(court => {
-        return (
-            (!sportSelect.value ||
-                court.sportName === sportSelect.value) &&
+    return (
+        (!sportSelect.value ||
+            court.sportName === sportSelect.value) &&
 
-            (!gymSelect.value ||
-                court.gymName === gymSelect.value) &&
-
-            (!sessionSelect.value ||
-                court.sessionName === sessionSelect.value)
+        (!gymSelect.value ||
+            court.gymName === gymSelect.value)
         );
     });
 
@@ -125,10 +210,6 @@ function displayCourts() {
         location.textContent =
             `${court.gymName} | ${court.sportName}`;
 
-        const session = document.createElement("p");
-        session.textContent =
-            `Session: ${court.sessionName}`;
-
         const status = document.createElement("p");
         status.textContent =
             `Status: ${court.status}`;
@@ -136,7 +217,7 @@ function displayCourts() {
         status.className =
             `status-${String(court.status).toLowerCase()}`;
 
-        card.append(title, location, session, status);
+        card.append(title, location, status);
 
         courtList.appendChild(card);
     });
@@ -145,7 +226,6 @@ function displayCourts() {
 // Filter when selections change
 sportSelect.addEventListener("change", displayCourts);
 gymSelect.addEventListener("change", displayCourts);
-sessionSelect.addEventListener("change", displayCourts);
 
 // Refresh button
 refreshButton.addEventListener("click", loadCourts);

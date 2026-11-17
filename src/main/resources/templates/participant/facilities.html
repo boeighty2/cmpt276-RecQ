@@ -35,11 +35,18 @@
             <option value="">All Gyms</option>
         </select>
 
-        <!-- Session Selection -->
-        <label for="session">Select Session:</label>
-        <select id="session">
-            <option value="">All Sessions</option>
-        </select>
+        <!-- Waiting Count Section -->
+        <section id="waitingSection" aria-labelledby="waitingHeading">
+
+            <h2 id="waitingHeading">Waiting Information</h2>
+
+            <p id="waitingMessage" role="status">
+                Select a sport and gym to view waiting information.
+            </p>
+
+            <div id="waitingCountList"></div>
+
+        </section>
 
         <h2>Court Availability</h2>
 
