@@ -232,3 +232,12 @@ refreshButton.addEventListener("click", loadCourts);
 
 // Load court information when the page opens
 loadCourts();
+
+/* // Cut in proposed fix for PR12
+// Logout button
+const logoutButton = document.getElementById("logoutButton");
+
+logoutButton.addEventListener("click", function() {
+    window.location.href = "/logged-out.html";
+});
+*/ 

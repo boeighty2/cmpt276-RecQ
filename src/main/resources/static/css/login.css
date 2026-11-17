@@ -1,0 +1,158 @@
+:root {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background-color: #f6f7f9;
+    color: #24292f;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: #f6f7f9;
+}
+
+/* Login Panel */
+.panel {
+    width: 100%;
+    max-width: 450px;
+    margin: 70px auto;
+    background-color: white;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+/* Header */
+.panel header {
+    background-color: #9a1830;
+    color: white;
+    padding: 25px 30px;
+}
+
+.panel header h1 {
+    margin: 0;
+    font-size: 28px;
+}
+
+/* Form Area */
+.panel form,
+.panel > p {
+    margin-left: 30px;
+    margin-right: 30px;
+}
+
+.panel form {
+    padding-top: 25px;
+}
+
+/* Labels */
+label {
+    display: block;
+    font-weight: 600;
+    margin: 0 0 8px;
+}
+
+/* Text Inputs */
+input {
+    width: 100%;
+    padding: 11px 14px;
+    margin-bottom: 18px;
+
+    border: 1px solid #ced3da;
+    border-radius: 8px;
+
+    background-color: white;
+    color: #24292f;
+    font-size: 14px;
+}
+
+input:focus {
+    outline: 2px solid #9a1830;
+    outline-offset: 1px;
+    border-color: #9a1830;
+}
+
+/* Login Button */
+button {
+    width: 100%;
+    background-color: #9a1830;
+    color: white;
+
+    padding: 11px 20px;
+    border: none;
+    border-radius: 8px;
+
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+
+    margin-top: 5px;
+}
+
+button:hover {
+    background-color: #7e1226;
+}
+
+button:focus-visible {
+    outline: 3px solid #246fc3;
+    outline-offset: 3px;
+}
+
+/* Messages */
+.notice {
+    margin-top: 20px;
+    padding: 12px 15px;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.notice.error {
+    color: #9b2c2c;
+    background-color: #fde8e8;
+    border: 1px solid #f5c2c2;
+}
+
+.notice.success {
+    color: #137547;
+    background-color: #e0f5e9;
+    border: 1px solid #b9e5ca;
+}
+
+/* Create Account Link */
+.panel > p:last-child {
+    margin-top: 22px;
+    margin-bottom: 30px;
+    color: #697381;
+}
+
+a {
+    color: #9a1830;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    .panel {
+        margin: 30px 16px;
+        width: auto;
+    }
+
+    .panel header {
+        padding: 20px;
+    }
+
+    .panel form,
+    .panel > p {
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+}
