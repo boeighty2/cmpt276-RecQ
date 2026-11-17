@@ -95,6 +95,34 @@ button:focus-visible {
     font-weight: 500;
 }
 
+/* Waiting Information Section */
+#waitingSection {
+    background-color: white;
+    padding: 22px 24px;
+    margin-top: 30px;
+    border-radius: 12px;
+    border: 1px solid #e1e4e8;
+    border-left: 4px solid #9a1830;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+/* Waiting Information Heading */
+#waitingHeading {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #9a1830;
+    font-size: 20px;
+}
+
+/* Waiting Count Message */
+#waitingMessage {
+    margin: 0;
+    color: #24292f;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.5;
+}
+
 /* Court Cards */
 #courtList {
     display: grid;
@@ -166,4 +194,21 @@ button:focus-visible {
     #courtList {
         grid-template-columns: 1fr;
     }
+}
+
+/* Logout Button */
+#logoutButton {
+    background-color: white;
+    color: #9a1830;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    float: right;
+}
+
+#logoutButton:hover {
+    background-color: #f0e5e8;
 }

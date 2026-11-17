@@ -2,11 +2,12 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Log in</title><link rel="stylesheet" th:href="@{/css/styles.css}">
+  <title>Log in</title>
+  <link rel="stylesheet" th:href="@{/css/login.css}">
 </head>
 <body>
+<header><h1>Login</h1></header>
 <main class="panel">
-  <h1>Log in</h1>
   <p class="notice error" th:if="${param.error}">Incorrect username or password. Please try again.</p>
   <p class="notice success" th:if="${param.registered}">Account created. You can now log in.</p>
   <p class="notice success" th:if="${param.logout}">You have been logged out.</p>
