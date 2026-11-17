@@ -43,10 +43,17 @@ public class QueueController {
     // staff
 
     @PostMapping("/join")
-    public QueueEntry join(@RequestParam String gym, @RequestParam String sport,
-                           @RequestParam Long userId, HttpServletRequest request) {
+    public QueueEntryView join(@RequestParam String gym, @RequestParam String sport,
+                            @RequestParam String username, HttpServletRequest request) {
         staffGuard.requireStaff(request);
-        return queueService.joinQueue(runId(gym, sport), userId);
+        Long run = runId(gym, sport);
+        String name = username.trim();
+        AppUser user = users.findByUsernameIgnoreCase(name)
+                .orElseThrow(() -> new NoSuchElementException(
+                        "No user with username \"" + name + "\""));
+        QueueEntry entry = queueService.joinQueue(run, user.getId());
+        return new QueueEntryView(entry.getId(), user.getId(), user.getUsername(),
+                entry.getStatus(), entry.getJoinedAt());
     }
 
     @GetMapping
