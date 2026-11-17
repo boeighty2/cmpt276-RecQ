@@ -6,10 +6,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import com.cmpt276g12.RecQ.auth.model.AppUser;
+import com.cmpt276g12.RecQ.auth.repository.AppUserRepository;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/queue")
@@ -19,11 +21,14 @@ public class QueueController {
     private final CourtService courtService;
     private final StaffRoleGuard staffGuard;
 
+    private final AppUserRepository users;
+
     public QueueController(QueueService queueService, CourtService courtService,
-                           StaffRoleGuard staffGuard) {
+                        StaffRoleGuard staffGuard, AppUserRepository users) {
         this.queueService = queueService;
         this.courtService = courtService;
         this.staffGuard = staffGuard;
+        this.users = users;
     }
 
     // activeRunId returns null when the sport is closed or has never been opened
@@ -45,10 +50,19 @@ public class QueueController {
     }
 
     @GetMapping
-    public List<QueueEntry> list(@RequestParam String gym, @RequestParam String sport,
-                                 HttpServletRequest request) {
+    public List<QueueEntryView> list(@RequestParam String gym, @RequestParam String sport,
+                                    HttpServletRequest request) {
         staffGuard.requireStaff(request);
-        return queueService.getQueue(runId(gym, sport));
+        List<QueueEntry> entries = queueService.getQueue(runId(gym, sport));
+        Map<Long, String> names = users
+                .findAllById(entries.stream().map(QueueEntry::getUserId).toList())
+                .stream()
+                .collect(Collectors.toMap(AppUser::getId, AppUser::getUsername));
+        return entries.stream()
+                .map(e -> new QueueEntryView(e.getId(), e.getUserId(),
+                        names.getOrDefault(e.getUserId(), "user " + e.getUserId()),
+                        e.getStatus(), e.getJoinedAt()))
+                .toList();
     }
 
     @PostMapping("/entries/{entryId}/remove")
