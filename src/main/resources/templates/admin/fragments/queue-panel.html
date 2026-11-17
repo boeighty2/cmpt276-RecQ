@@ -12,8 +12,8 @@
 
     <!-- Epic 4: Staff check-in -->
     <div>
-      <input class="qp-user" type="number"
-             placeholder="Participant user ID">
+      <input class="qp-user" type="text" autocomplete="off"
+            placeholder="Participant username">
       <button class="qp-add" type="button">
         Check in &amp; add
       </button>
@@ -32,7 +32,7 @@
       <thead>
         <tr>
           <th>#</th>
-          <th>User</th>
+          <th>Participant</th>
           <th>Entry</th>
           <th>Status</th>
           <th>Joined</th>
@@ -80,32 +80,33 @@
           rows.innerHTML = "";
 
           queue.forEach(function (e, i) {
-
             const tr = document.createElement("tr");
 
-            // Only OFFERED users can be confirmed
-            const confirmButton =
-              e.status === "OFFERED"
-                ? "<button type='button' " +
-                  "data-action='confirm' data-id='" +
-                  e.id + "'>Confirm Turn</button>"
-                : "";
+            function cell(text) {
+              const td = document.createElement("td");
+              td.textContent = String(text);
+              tr.appendChild(td);
+            }
 
-            const removeButton =
-              "<button type='button' " +
-              "data-action='remove' data-id='" +
-              e.id + "'>Remove</button>";
+            cell(i + 1);
+            cell(e.username);
+            cell(e.id);
+            cell(e.status);
+            cell(new Date(e.joinedAt).toLocaleTimeString());
 
-            tr.innerHTML =
-              "<td>" + (i + 1) + "</td>" +
-              "<td>" + e.userId + "</td>" +
-              "<td>" + e.id + "</td>" +
-              "<td>" + e.status + "</td>" +
-              "<td>" +
-              new Date(e.joinedAt).toLocaleTimeString() +
-              "</td>" +
-              "<td>" + confirmButton + " " +
-              removeButton + "</td>";
+            const actions = document.createElement("td");
+            function addButton(label, action) {
+              const b = document.createElement("button");
+              b.type = "button";
+              b.textContent = label;
+              b.dataset.action = action;
+              b.dataset.id = e.id;
+              actions.appendChild(b);
+              actions.appendChild(document.createTextNode(" "));
+            }
+            if (e.status === "OFFERED") addButton("Confirm Turn", "confirm");
+            addButton("Remove", "remove");
+            tr.appendChild(actions);
 
             rows.appendChild(tr);
           });
@@ -116,18 +117,19 @@
           .addEventListener("click", async function () {
 
             const input = panel.querySelector(".qp-user");
-            if (!input.value) return;
+            const username = input.value.trim();
+            if (!username) return;
 
             const res = await fetch(
               "/api/queue/join?" + q +
-              "&userId=" + encodeURIComponent(input.value),
+              "&username=" + encodeURIComponent(username),
               { method: "POST" }
             );
 
             if (!res.ok) {
               msg.textContent = await errorText(res);
             } else {
-              msg.textContent = "Participant added.";
+              msg.textContent = username + " added.";
             }
 
             input.value = "";
